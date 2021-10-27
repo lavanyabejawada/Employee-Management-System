@@ -1,45 +1,46 @@
 package com.java.dao;  
-import java.sql.ResultSet;  
-import java.sql.SQLException;  
-import java.util.List;  
-import org.springframework.jdbc.core.BeanPropertyRowMapper;  
-import org.springframework.jdbc.core.JdbcTemplate;  
-import org.springframework.jdbc.core.RowMapper;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.java.beans.Emp;  
-  
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.java.beans.Emp;
+
+
+
+@Repository
+
 public class EmpDao {  
-JdbcTemplate template;  
-  
-public void setTemplate(JdbcTemplate template) {  
-    this.template = template;  
-}  
-public int save(Emp p){  
-    String sql="insert into Emp99(name,salary,designation) values('"+p.getName()+"',"+p.getSalary()+",'"+p.getDesignation()+"')";  
-    return template.update(sql);  
-}  
-public int update(Emp p){  
-    String sql="update Emp99 set name='"+p.getName()+"', salary="+p.getSalary()+",designation='"+p.getDesignation()+"' where id="+p.getId()+"";  
-    return template.update(sql);  
-}  
-public int delete(int id){  
-    String sql="delete from Emp99 where id="+id+"";  
-    return template.update(sql);  
-}  
-public Emp getEmpById(int id){  
-    String sql="select * from Emp99 where id=?";  
-    return template.queryForObject(sql, new Object[]{id},new BeanPropertyRowMapper<Emp>(Emp.class));  
-}  
-public List<Emp> getEmployees(){  
-    return template.query("select * from Emp99",new RowMapper<Emp>(){  
-        public Emp mapRow(ResultSet rs, int row) throws SQLException {  
-            Emp e=new Emp();  
-            e.setId(rs.getInt(1));  
-            e.setName(rs.getString(2));  
-            e.setSalary(rs.getFloat(3));  
-            e.setDesignation(rs.getString(4));  
-            return e;  
-        }  
-    });  
-}  
-}  
+
+	@Autowired
+	private HibernateTemplate template;
+	
+	@Transactional
+public void save(Emp p){    
+	    template.save(p);    
+	}
+	@Transactional
+	public void update(Emp p){    
+	   template.update(p);    
+	} 
+	@Transactional
+	public void delete(int id){  
+		Emp p = (Emp)this.template.get(Emp.class, id);
+	   template.delete(p);    
+	}  
+	public Emp getEmpById(int id){    
+		Emp p = (Emp)this.template.get(Emp.class, id);
+	    return p;  
+	}    
+	
+	
+	public List<Emp> getEmployeeById(){    
+		List<Emp> list=new ArrayList<Emp>();  
+	    list=template.loadAll(Emp.class);  
+	    return list;     
+	}
+	
+} 
